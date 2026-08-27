@@ -549,6 +549,33 @@ button.danger:hover { background: color-mix(in srgb, #e5484d 15%, transparent); 
 .comment-body { font-size: 12.5px; }
 .comment-body p:last-child { margin-bottom: 0; }
 
+/* 하위 이슈 완료 정도 표기(KNK-114) */
+.sub-progress {
+  flex: none;
+  font-size: 11px;
+  padding: 1px 7px;
+  border-radius: 999px;
+  background: var(--muxy-surface, rgba(127, 127, 127, 0.12));
+  color: var(--muxy-fg, inherit);
+  opacity: 0.8;
+  font-variant-numeric: tabular-nums;
+}
+.sub-progress-bar {
+  height: 4px;
+  border-radius: 999px;
+  background: var(--muxy-surface, rgba(127, 127, 127, 0.18));
+  overflow: hidden;
+  margin: 0 0 8px;
+}
+.sub-progress-fill {
+  height: 100%;
+  width: 0;
+  border-radius: inherit;
+  background: var(--muxy-accent, #5e6ad2);
+  transition: width 0.2s ease;
+}
+.sub-progress-bar.is-complete .sub-progress-fill { background: #4cb782; }
+
 /* 하위 이슈 목록 */
 .sub-issues { display: flex; flex-direction: column; gap: 4px; }
 .sub-issue {
