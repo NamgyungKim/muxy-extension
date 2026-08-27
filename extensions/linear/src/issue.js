@@ -107,9 +107,11 @@ async function main() {
     <hr class="sep" />
     <div class="row" style="margin-bottom:6px">
       <h3 class="sec-title" style="margin:0">${t("issue.subIssues")}</h3>
+      <span id="sub-progress" class="sub-progress" hidden></span>
       <span class="spacer"></span>
       <button id="add-sub" class="mini">${t("issue.addSubIssue")}</button>
     </div>
+    <div id="sub-progress-bar" class="sub-progress-bar" hidden><div id="sub-progress-fill" class="sub-progress-fill"></div></div>
     <div id="sub-issues" class="sub-issues muted">${t("common.loading")}</div>
 
     <hr class="sep" />
@@ -396,8 +398,35 @@ async function main() {
     }
   }
 
+  // 하위 이슈 완료 정도 표기(KNK-114): 취소된 하위 이슈는 분모에서 제외하고, 완료
+  // 상태(state.type === "completed") 개수를 세어 "N/M 완료 + 진행 바"로 보여준다.
+  // 하위 이슈가 없으면 진행 표시를 감춘다.
+  function updateSubProgress(list) {
+    const badge = $("sub-progress");
+    const bar = $("sub-progress-bar");
+    const fill = $("sub-progress-fill");
+    // 취소(canceled)는 진행률 계산에서 빼서 Linear 의 하위 이슈 진행 링과 동일하게 맞춘다.
+    const counted = list.filter((c) => c.state?.type !== "canceled");
+    const total = counted.length;
+    if (!total) {
+      badge.hidden = true;
+      bar.hidden = true;
+      return;
+    }
+    const done = counted.filter((c) => c.state?.type === "completed").length;
+    const percent = Math.round((done / total) * 100);
+    badge.textContent = t("issue.subIssueProgress", { done, total });
+    badge.title = t("issue.subIssueProgressTitle", { done, total, percent });
+    badge.hidden = false;
+    fill.style.width = `${percent}%`;
+    bar.hidden = false;
+    // 전부 완료되면 진행 바를 완료 색으로 강조한다.
+    bar.classList.toggle("is-complete", done === total);
+  }
+
   // 하위 이슈: 상태 점 + 식별자 + 제목. 클릭하면 그 이슈를 새 탭으로 연다(모달 폴백).
   function renderSubIssues(list) {
+    updateSubProgress(list);
     const box = $("sub-issues");
     box.classList.remove("muted");
     box.innerHTML = "";
